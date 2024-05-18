@@ -1,0 +1,7 @@
+.idea/*
+2021-punctuation-restoration
+poleval_text.rest*
+original_*
+rest/
+__pycache__/*
+*.conll

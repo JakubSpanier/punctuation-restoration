@@ -1,7 +1,8 @@
 pandas
-transformers
-sklearn
+ruff
+scikit-learn
 simpletransformers
 torch 
 torchvision 
 torchaudio
+transformers
