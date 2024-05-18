@@ -78,20 +78,24 @@ class JsonToConllConverter:
                 text_exp += " "
             text += " "
 
-        text_in = re.sub(r'[,!?.:;-]', ' ', text_in.lower())
-        text_in = re.sub(r' +', ' ', text_in)
+        text_in = re.sub(r"[,!?.:;-]", " ", text_in.lower())
+        text_in = re.sub(r" +", " ", text_in)
 
         text_exp = text_exp.lower()
         text_exp = re.sub(r"\.\.\.", "…", text_exp)
-        text_exp = re.sub(r'[!?.:;-]([^ ])', r' \1', text_exp)
-        text_exp = re.sub(r'[…,!?.:;-]', ' ', text_exp)
-        text_exp = re.sub(r' +', ' ', text_exp)
+        text_exp = re.sub(r"[!?.:;-]([^ ])", r" \1", text_exp)
+        text_exp = re.sub(r"[…,!?.:;-]", " ", text_exp)
+        text_exp = re.sub(r" +", " ", text_exp)
         text_exp = re.sub(r"…", "...", text_exp)
 
         try:
             assert len(text_in.strip().split(" ")) == len(text_exp.strip().split(" "))
         except AssertionError:
-            print(len(text_in.strip().split(" ")), len(text_exp.strip().split(" ")), file=sys.stderr)
+            print(
+                len(text_in.strip().split(" ")),
+                len(text_exp.strip().split(" ")),
+                file=sys.stderr,
+            )
             print(text_exp.strip().split(" "), file=sys.stderr)
             print(text_in.strip().split(" "), file=sys.stderr)
             for a, b in zip(text_exp.strip().split(" "), text_in.strip().split(" ")):
@@ -101,7 +105,9 @@ class JsonToConllConverter:
         return text_in.strip(), text_exp.strip()
 
     def _write_output(self, name, paths):
-        with open(os.path.join(self.save_path, f"{name}_expected.tsv"), "w") as out_expected, open(
+        with open(
+            os.path.join(self.save_path, f"{name}_expected.tsv"), "w"
+        ) as out_expected, open(
             os.path.join(self.save_path, f"{name}_in.tsv"), "w"
         ) as out_in:
             for path in paths:
@@ -113,17 +119,31 @@ class JsonToConllConverter:
     def convert(self):
         train_paths, test_paths, rest_paths = self._get_json_paths()
 
-        for name, paths in [("test", test_paths), ("train", train_paths), ("rest", rest_paths)]:
+        for name, paths in [
+            ("test", test_paths),
+            ("train", train_paths),
+            ("rest", rest_paths),
+        ]:
             self._write_output(name, paths)
 
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Convert JSON to CONLL")
-    parser.add_argument("--train_path", default="2021-punctuation-restoration/train/in.tsv", help="Path to train in.tsv")
-    parser.add_argument("--test_path", default="2021-punctuation-restoration/test-A/in.tsv", help="Path to test in.tsv")
+    parser.add_argument(
+        "--train_path",
+        default="2021-punctuation-restoration/train/in.tsv",
+        help="Path to train in.tsv",
+    )
+    parser.add_argument(
+        "--test_path",
+        default="2021-punctuation-restoration/test-A/in.tsv",
+        help="Path to test in.tsv",
+    )
     parser.add_argument("data", nargs="+", help="Paths to dirs with JSONs")
     parser.add_argument("--save_path", default=".", help="Path to directory")
     args = parser.parse_args()
 
-    converter = JsonToConllConverter(args.train_path, args.test_path, args.data, args.save_path)
+    converter = JsonToConllConverter(
+        args.train_path, args.test_path, args.data, args.save_path
+    )
     converter.convert()

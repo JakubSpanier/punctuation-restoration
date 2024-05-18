@@ -55,7 +55,9 @@ class JsonToConllConverter:
         return sorted_paths
 
     def _write_output(self, name, paths):
-        with open(os.path.join(self.save_path, f"{name}_expected.tsv"), "w") as out_expected, open(
+        with open(
+            os.path.join(self.save_path, f"{name}_expected.tsv"), "w"
+        ) as out_expected, open(
             os.path.join(self.save_path, f"{name}_in.tsv"), "w"
         ) as out_in:
             for path in paths:
@@ -67,7 +69,11 @@ class JsonToConllConverter:
     def convert(self):
         train_paths, test_paths, rest_paths = self._get_json_paths()
 
-        for name, paths in [("test", test_paths), ("train", train_paths), ("rest", rest_paths)]:
+        for name, paths in [
+            ("test", test_paths),
+            ("train", train_paths),
+            ("rest", rest_paths),
+        ]:
             self._write_output(name, paths)
 
         print(len(test_paths), len(test_paths), len(train_paths), len(train_paths))
@@ -75,11 +81,21 @@ class JsonToConllConverter:
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Convert JSON to CONLL")
-    parser.add_argument("--train_path", default="2021-punctuation-restoration/train/in.tsv", help="Path to train in.tsv")
-    parser.add_argument("--test_path", default="2021-punctuation-restoration/test-A/in.tsv", help="Path to test in.tsv")
+    parser.add_argument(
+        "--train_path",
+        default="2021-punctuation-restoration/train/in.tsv",
+        help="Path to train in.tsv",
+    )
+    parser.add_argument(
+        "--test_path",
+        default="2021-punctuation-restoration/test-A/in.tsv",
+        help="Path to test in.tsv",
+    )
     parser.add_argument("data", nargs="+", help="Paths to dirs with JSONs")
     parser.add_argument("--save_path", default=".", help="Path to directory")
     args = parser.parse_args()
 
-    converter = JsonToConllConverter(args.train_path, args.test_path, args.data, args.save_path)
+    converter = JsonToConllConverter(
+        args.train_path, args.test_path, args.data, args.save_path
+    )
     converter.convert()

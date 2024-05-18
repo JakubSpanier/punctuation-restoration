@@ -12,7 +12,7 @@ class TsvParser:
         in_path: Optional[Path] = None,
         expected_path: Optional[Path] = None,
         times_dir: Optional[Path] = None,
-        save_path: Optional[Path] = None
+        save_path: Optional[Path] = None,
     ) -> None:
         """
         :param in_path: Path to in.tsv
@@ -21,14 +21,20 @@ class TsvParser:
         :param save_path: Path to save output
         """
         self.in_path = in_path if in_path else Path("data/train/in.tsv")
-        self.expected_path = expected_path if expected_path else Path("data/train/expected.tsv")
+        self.expected_path = (
+            expected_path if expected_path else Path("data/train/expected.tsv")
+        )
         self.times_dir = times_dir
-        self.save_path = save_path if save_path else Path("parsed_data/original_train.conll")
+        self.save_path = (
+            save_path if save_path else Path("parsed_data/original_train.conll")
+        )
 
     def convert(self):
-        """ Convert .tsv files to .conll """
+        """Convert .tsv files to .conll"""
         with open(self.save_path, "w") as out_file:
-            for in_line, expected_line in zip(open(self.in_path), open(self.expected_path)):
+            for in_line, expected_line in zip(
+                open(self.in_path), open(self.expected_path)
+            ):
                 in_line = in_line.strip()
                 expected_line = expected_line.strip()
                 wikipunct_text_id, text = in_line.split("\t")
@@ -40,10 +46,14 @@ class TsvParser:
                     continue
 
                 if self.times_dir:
-                    times = self._times_after_tokens(f"{self.times_dir}/{wikipunct_text_id}.clntmstmp")
+                    times = self._times_after_tokens(
+                        f"{self.times_dir}/{wikipunct_text_id}.clntmstmp"
+                    )
                     matched = self._match_times(times, expected_line.split(" "))
 
-                for i, (in_token, expected_token) in enumerate(zip(text.split(" "), expected_line.split(" "))):
+                for i, (in_token, expected_token) in enumerate(
+                    zip(text.split(" "), expected_line.split(" "))
+                ):
                     expected_token = expected_token.lower()
                     label = self._determine_label(in_token, expected_token)
 
