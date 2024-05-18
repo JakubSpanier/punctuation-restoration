@@ -1,7 +1,8 @@
 .idea/*
-2021-punctuation-restoration
+data
+parsed_data
 poleval_text.rest*
 original_*
 rest/
-__pycache__/*
+*.pyc
 *.conll
