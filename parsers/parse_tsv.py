@@ -11,23 +11,22 @@ class TsvParser:
         self,
         in_path: Optional[Path] = None,
         expected_path: Optional[Path] = None,
-        times_dir: Optional[Path] = None,
+        fa_transcriptions_directory: Optional[Path] = None,
         save_path: Optional[Path] = None,
     ) -> None:
         """
         :param in_path: Path to in.tsv
         :param expected_path: Path to expected.tsv
-        :param times_dir: Path to dir with *.clntmstmp, basically the forced aligned texts
+        :param fa_transcriptions_directory: Path to dir with *.clntmstmp, basically the forced aligned texts
         :param save_path: Path to save output
         """
-        self.in_path = in_path if in_path else Path("data/train/in.tsv")
-        self.expected_path = (
-            expected_path if expected_path else Path("data/train/expected.tsv")
-        )
-        self.times_dir = times_dir
-        self.save_path = (
-            save_path if save_path else Path("parsed_data/original_train.conll")
-        )
+        # a or b is just more pythonic way to do a if a else b
+        self.in_path = in_path or Path("data/train/in.tsv")
+        self.expected_path = expected_path or Path("data/train/expected.tsv")
+        # not sure which path should be default
+        # Path("data/fa/poleval_fa.train") or Path("data/fa/poleval_fa.train.with_punctuation") 🤔
+        self.fa_transcriptions_directory = fa_transcriptions_directory
+        self.save_path = save_path or Path("parsed_data/original_train.conll")
 
     def convert(self):
         """Convert .tsv files to .conll"""
@@ -37,85 +36,134 @@ class TsvParser:
             ):
                 in_line = in_line.strip()
                 expected_line = expected_line.strip()
-                wikipunct_text_id, text = in_line.split("\t")
+                wikipunct_text_id, in_text = in_line.split("\t")
 
                 try:
-                    assert len(text.split(" ")) == len(expected_line.split(" "))
+                    assert len(in_text.split(" ")) == len(expected_line.split(" "))
                 except AssertionError:
                     logger.warning("Source text and expected text differ!")
                     continue
 
-                if self.times_dir:
-                    times = self._times_after_tokens(
-                        f"{self.times_dir}/{wikipunct_text_id}.clntmstmp"
+                if self.fa_transcriptions_directory:
+                    words_and_breaks = self._calculate_breaks(
+                        Path(
+                            f"{self.fa_transcriptions_directory}/{wikipunct_text_id}.clntmstmp"
+                        )
                     )
-                    matched = self._match_times(times, expected_line.split(" "))
+                    matched = self._provide_breaks_for_expected(
+                        words_and_breaks, expected_line.split(" ")
+                    )
 
                 for i, (in_token, expected_token) in enumerate(
-                    zip(text.split(" "), expected_line.split(" "))
+                    zip(in_text.split(" "), expected_line.split(" "))
                 ):
                     expected_token = expected_token.lower()
                     label = self._determine_label(in_token, expected_token)
 
-                    if self.times_dir:
+                    if self.fa_transcriptions_directory:
                         out_file.write(f"{in_token}\t{label}\t{matched[i]}\n")
                     else:
                         out_file.write(f"{in_token}\t{label}\n")
                 out_file.write("\n")
 
     @staticmethod
-    def _read_times_data(path):
+    def _parse_transcript(path: Path) -> list[tuple[int, int, str]]:
+        """
+        parse text from forced-aligned texts
+        (690,750) we
+        (840,1350) wrocławiu
+        (1650,1920) walkę
+        ...
+        </s>
+
+        Returns:
+            [(690, 750, "we"), (840, 1350, "wrocławiu"), (1650, 1920, "walkę"), ...]
+        """
         data = []
         with open(path) as file:
             for line in file:
                 line = line.strip()
                 if line == "</s>":
                     continue
-                times, text = line.split(" ")
-                start, end = map(int, times[1:-1].split(","))
-                data.append((start, end, text))
+                timestamps, word = line.split(" ")
+                # timestamps = "(1290,1320)"
+                start, end = map(int, timestamps.strip("()").split(","))
+                data.append((start, end, word))
         return data
 
-    def _times_after_tokens(self, path):
-        data = self._read_times_data(path)
+    def _calculate_breaks(self, path: Path) -> list[tuple[str, int]]:
+        """
+        calculate breaks between end timestamp and start timestamp of the next word
+
+        Returns:
+            [("we", 90), ("wrocławiu", 300), ...]
+        """
         result = []
-        for i in range(len(data)):
-            start, end, text = data[i]
-            przerwa = data[i + 1][0] - end if i + 1 < len(data) else 0
-            result.append((text, przerwa))
+        data = self._parse_transcript(path)
+        for i, (_start, end, word) in enumerate(data[:-1]):
+            break_ = data[i + 1][0] - end
+            result.append((word, break_))
+        # add the last word, and the break (so basically 0)
+        result.append((data[-1][2], 0))
+
         return result
 
     @staticmethod
-    def _match_times(times, expected):
+    def _provide_breaks_for_expected(
+        words_and_breaks: list[tuple[str, int]], expected_text: list[str]
+    ) -> list[int]:
+        """
+        calculate the break times for expected text
+        if the word matches the word from fa transcript, it returns the break to the next word
+        otherwise it returns -1
+
+        :param words_and_breaks:
+        :param expected_text:
+        :return:
+
+        Returns:
+            [90, 300, -1, 210, -1, ...]
+        """
         matched = []
         times_text = ""
         times_indexes = {}
 
-        for token, time in times:
-            times_indexes[len(times_text)] = time
-            times_text += token.lower()
+        for word, break_ in words_and_breaks:
+            times_indexes[len(times_text)] = break_
+            times_text += word.lower()
 
         index = 0
-        for token in expected:
-            found_index = times_text.find(token.lower(), index)
-            if found_index >= 0:
-                if found_index in times_indexes:
-                    matched.append(times_indexes[found_index])
-                    index = found_index
-                else:
-                    matched.append(-1)
+        for word in expected_text:
+            found_index = times_text.find(word.lower(), index)
+            if found_index < 0:  # not found
+                matched.append(-1)
+                continue
+
+            if found_index in times_indexes:
+                matched.append(times_indexes[found_index])
+                index = found_index
             else:
                 matched.append(-1)
+
         return matched
 
     @staticmethod
-    def _determine_label(in_token, expected_token):
+    def _determine_label(in_token: str, expected_token: str) -> str:
+        """
+        if the tokens are equal, returns B
+        otherwise check, if they are almost equal and
+        expected word contains punctuation
+
+        :param in_token:
+        :param expected_token:
+        :returns
+        """
         if in_token == expected_token:
             return "B"
         elif in_token == expected_token[:-1]:
             return expected_token[-1]
         elif in_token == expected_token[:-3] and expected_token[-3:] == "...":
-            return expected_token[-3:]
+            return "..."
         else:
             print("ERROR", in_token, expected_token, file=sys.stderr)
             return "B"
