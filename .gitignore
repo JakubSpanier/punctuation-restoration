@@ -1,0 +1,8 @@
+.idea/*
+data
+parsed_data
+poleval_text.rest*
+original_*
+rest/
+*.pyc
+*.conll
