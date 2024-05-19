@@ -58,7 +58,7 @@ class JsonToTsvConverter:
             Path("data/text.rest/wikitalks/all/json"),
         ]
         self.data_paths = data_paths or default_data_paths
-        self.save_path = save_path or Path("data/text.rest")
+        self.save_path = save_path or Path("parsed_data/text.rest")
 
     def convert(self) -> None:
         """

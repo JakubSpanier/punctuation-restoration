@@ -1,5 +1,4 @@
 import logging
-import sys
 from pathlib import Path
 from typing import Optional
 
@@ -165,7 +164,7 @@ class TsvParser:
         elif in_token == expected_token[:-3] and expected_token[-3:] == "...":
             return "..."
         else:
-            print("ERROR", in_token, expected_token, file=sys.stderr)
+            logger.error(f"Missmatch! Words aren't equal, ({in_token=}!={expected_token=})")
             return "B"
 
 
