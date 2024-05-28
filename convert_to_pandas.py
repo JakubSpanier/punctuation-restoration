@@ -93,3 +93,5 @@ if __name__ == "__main__":
             data.to_csv(args.out_file, sep="\t")
         else:
             data.to_csv("data.tsv", sep="\t")
+
+print("Dupa")
