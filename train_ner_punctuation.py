@@ -9,7 +9,6 @@ import time
 from utils import load_data_as_dataframe
 import wandb
 
-
 labels = ["B", ":", ";", ",", ".", "-", "...", "?", "!"]
 
 
@@ -123,15 +122,15 @@ if __name__ == "__main__":
     # eval_data = load_data_as_dataframe(args.eval_data_dir)
 
     train_data = pd.read_csv(args.train_data_dir, sep="\t", header=0)
-    eval_data = pd.read_csv(args.eval_data_dir, sep="\t", header=0)
+    # eval_data = pd.read_csv(args.eval_data_dir, sep="\t", header=0) MR
 
-    sentences_to_delete = train_data[
-        ~train_data.labels.isin(labels)
-    ].sentence_id  # coś to robi?
-    train_data = train_data.loc[~train_data.sentence_id.isin(sentences_to_delete)]
+    # sentences_to_delete = train_data[
+    #    ~train_data.labels.isin(labels)
+    # ].sentence_id  # coś to robi?
+    # train_data = train_data.loc[~train_data.sentence_id.isin(sentences_to_delete)]
 
-    sentences_to_delete = eval_data[~eval_data.labels.isin(labels)].sentence_id
-    eval_data = eval_data.loc[~eval_data.sentence_id.isin(sentences_to_delete)]
+    # sentences_to_delete = eval_data[~eval_data.labels.isin(labels)].sentence_id
+    # eval_data = eval_data.loc[~eval_data.sentence_id.isin(sentences_to_delete)]
 
     ner_args = NERArgs()
     ner_args.early_stopping_metric = args.early_stopping_metric
@@ -141,18 +140,18 @@ if __name__ == "__main__":
     ner_args.wandb_project = args.wandb_project
     ner_args.wandb_kwargs = {"settings": wandb.Settings(start_method="thread")}
     ner_args.train_batch_size = args.batch_size
-    ner_args.eval_batch_size = args.batch_size
+    #ner_args.eval_batch_size = args.batch_size
     ner_args.gradient_accumulation_steps = args.acc
     ner_args.learning_rate = args.learning_rate
     ner_args.num_train_epochs = args.epochs
-    ner_args.evaluate_during_training = args.eval_during_training
-    ner_args.evaluate_during_training_steps = 20  # args.eval_steps
+    #ner_args.evaluate_during_training = args.eval_during_training
+    #ner_args.evaluate_during_training_steps = 20  # args.eval_steps
     ner_args.max_seq_length = args.max_seq_len
     ner_args.manual_seed = args.seed
     ner_args.warmup_steps = args.warmup_steps
-    ner_args.save_eval_checkpoints = False
+    #ner_args.save_eval_checkpoints = False
     ner_args.use_multiprocessing = False
-    ner_args.use_multiprocessing_for_evaluation = False
+    #ner_args.use_multiprocessing_for_evaluation = False
 
     if args.use_dice:
         ner_args.loss_type = "dice"
@@ -248,7 +247,7 @@ if __name__ == "__main__":
             zero_division=0,
             labels=labels[1:],
         ),
-        #'classification_report': lambda y_true, y_pred: sklearn.metrics.classification_report(y_true, y_pred,
+        # 'classification_report': lambda y_true, y_pred: sklearn.metrics.classification_report(y_true, y_pred,
         #                                                                                      output_dict=True),
         "confusion_matrix": lambda y_true, y_pred: merge_data(
             sklearn.metrics.confusion_matrix, y_true, y_pred, labels=labels[1:]
@@ -260,7 +259,7 @@ if __name__ == "__main__":
 
     # labels = list(train_data.labels.unique())
     train_data.words = train_data.words.astype(str)
-    eval_data.words = eval_data.words.astype(str)
+    # eval_data.words = eval_data.words.astype(str) MR
     print("labels", labels)
     start = time.time()
     output_dir = f"model_dir_{args.model_name}_{start}"
@@ -276,9 +275,11 @@ if __name__ == "__main__":
         use_cuda=True if torch.cuda.is_available() else False,
     )
 
-    model.train_model(train_data, output_dir=output_dir, eval_data=eval_data, **metrics)
+    # model.train_model(train_data, output_dir=output_dir, eval_data=eval_data, **metrics) MR
+    model.train_model(train_data, output_dir=output_dir, **metrics)
 
     # with open('test-A/in.tsv') as f:
     #    to_predict = [line.split('\t')[1] for line in f]
 
     # print(model.predict(to_predict, split_on_space=True))
+
