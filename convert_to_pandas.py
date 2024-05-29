@@ -33,7 +33,7 @@ if __name__ == "__main__":
     tags = [[]]
     spaces_after = [[]]
 
-    with open(args.data_file) as f:
+    with open(args.data_file, encoding='utf-8') as f:
         for line in f:
             if line.startswith("-DOCSTART-"):
                 continue
