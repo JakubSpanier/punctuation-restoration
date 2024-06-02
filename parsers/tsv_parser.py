@@ -164,7 +164,9 @@ class TsvParser:
         elif in_token == expected_token[:-3] and expected_token[-3:] == "...":
             return "..."
         else:
-            logger.error(f"Missmatch! Words aren't equal, ({in_token=}!={expected_token=})")
+            logger.error(
+                f"Missmatch! Words aren't equal, ({in_token=}!={expected_token=})"
+            )
             return "B"
 
 
@@ -174,7 +176,7 @@ if __name__ == "__main__":
             "in_path": Path(f"data/{directory_name}/in.tsv"),
             "expected_path": Path(f"data/{directory_name}/expected.tsv"),
             # "fa_transcriptions_directory": Path("data/fa/poleval_fa.train.with_punctuation"),
-            "save_path": Path(f"parsed_data/original_{directory_name}.conll")
+            "save_path": Path(f"parsed_data/original_{directory_name}.conll"),
         }
 
         tsv_parser = TsvParser(**kwargs)
@@ -187,7 +189,7 @@ if __name__ == "__main__":
             kwargs = {
                 "in_path": main_path / Path(f"{name}_in.tsv"),
                 "expected_path": main_path / Path(f"{name}_expected.tsv"),
-                "save_path": main_path / Path(f"{name}.conll")
+                "save_path": main_path / Path(f"{name}.conll"),
             }
             tsv_parser = TsvParser(**kwargs)
             tsv_parser.convert()

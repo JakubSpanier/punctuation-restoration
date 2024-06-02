@@ -31,7 +31,8 @@ class TsvFileData:
         self.spaces_after.append([])
 
     def to_data_frame(self) -> pd.DataFrame:
-        return pd.DataFrame({
+        return pd.DataFrame(
+            {
                 "words": word,
                 "labels": tag,
                 "times": space_after,
@@ -66,8 +67,12 @@ class DataFrameSplitter:
         df = self._process_file(self.data_file)
 
         if self.split_to_files:
-            train_data, dev_test_data = self._split_dataframe(df, train_prop=TRAIN_TO_TEST_DEV_RATIO)
-            dev_data, test_data = self._split_dataframe(dev_test_data, train_prop=DEV_TO_TEST_RATIO)
+            train_data, dev_test_data = self._split_dataframe(
+                df, train_prop=TRAIN_TO_TEST_DEV_RATIO
+            )
+            dev_data, test_data = self._split_dataframe(
+                dev_test_data, train_prop=DEV_TO_TEST_RATIO
+            )
 
             self._save_to_file(train_data, suffix=f"_train_{self.seed}")
             self._save_to_file(dev_data, suffix=f"_dev_{self.seed}")
@@ -110,7 +115,9 @@ class DataFrameSplitter:
         self.data.append(word=word, tag=tag, space=space)
 
     @staticmethod
-    def _split_dataframe(data: pd.DataFrame, train_prop: float = 0.9) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def _split_dataframe(
+        data: pd.DataFrame, train_prop: float = 0.9
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Splits a DataFrame into training and testing sets based on sentence_id.
 
@@ -142,13 +149,20 @@ class DataFrameSplitter:
 
 # Example usage
 if __name__ == "__main__":
-    kwargs = {
-        "split_to_files": True
-    }
+    kwargs = {"split_to_files": True}
     files = (
-        (Path("../parsed_data/original_train.conll"), Path("parsed_data/original_train.tsv")),
-        (Path("../parsed_data/original_test-A.conll"), Path("parsed_data/original_test-A.tsv")),
-        (Path("../parsed_data/text.rest/rest.conll"), Path("parsed_data/text.rest/rest.tsv")),
+        (
+            Path("../parsed_data/original_train.conll"),
+            Path("parsed_data/original_train.tsv"),
+        ),
+        (
+            Path("../parsed_data/original_test-A.conll"),
+            Path("parsed_data/original_test-A.tsv"),
+        ),
+        (
+            Path("../parsed_data/text.rest/rest.conll"),
+            Path("parsed_data/text.rest/rest.tsv"),
+        ),
     )
     for data_file, out_file in files:
         kwargs["data_file"] = data_file

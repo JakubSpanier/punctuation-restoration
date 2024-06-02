@@ -1,5 +1,6 @@
 pandas
 ruff
+sacremoses
 scikit-learn
 simpletransformers
 torch 
