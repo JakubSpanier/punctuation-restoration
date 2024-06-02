@@ -169,5 +169,25 @@ class TsvParser:
 
 
 if __name__ == "__main__":
-    tsv_parser = TsvParser()
-    tsv_parser.convert()
+    for directory_name in ("train", "test-A"):
+        kwargs = {
+            "in_path": Path(f"data/{directory_name}/in.tsv"),
+            "expected_path": Path(f"data/{directory_name}/expected.tsv"),
+            # "fa_transcriptions_directory": Path("data/fa/poleval_fa.train.with_punctuation"),
+            "save_path": Path(f"parsed_data/original_{directory_name}.conll")
+        }
+
+        tsv_parser = TsvParser(**kwargs)
+        tsv_parser.convert()
+
+    # Do this part after converting text jsons to tsv with the JsonToTsvConverter
+    if False:
+        for name in ("train", "test", "rest"):
+            main_path = Path("parsed_data/text.rest/")
+            kwargs = {
+                "in_path": main_path / Path(f"{name}_in.tsv"),
+                "expected_path": main_path / Path(f"{name}_expected.tsv"),
+                "save_path": main_path / Path(f"{name}.conll")
+            }
+            tsv_parser = TsvParser(**kwargs)
+            tsv_parser.convert()
