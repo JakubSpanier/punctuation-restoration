@@ -146,9 +146,9 @@ if __name__ == "__main__":
         "split_to_files": True
     }
     files = (
-        (Path("parsed_data/original_train.conll"), Path("parsed_data/original_train.tsv")),
-        (Path("parsed_data/original_test-A.conll"), Path("parsed_data/original_test-A.tsv")),
-        (Path("parsed_data/text.rest/rest.conll"), Path("parsed_data/text.rest/rest.tsv")),
+        (Path("../parsed_data/original_train.conll"), Path("parsed_data/original_train.tsv")),
+        (Path("../parsed_data/original_test-A.conll"), Path("parsed_data/original_test-A.tsv")),
+        (Path("../parsed_data/text.rest/rest.conll"), Path("parsed_data/text.rest/rest.tsv")),
     )
     for data_file, out_file in files:
         kwargs["data_file"] = data_file
