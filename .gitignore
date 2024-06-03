@@ -6,3 +6,6 @@ original_*
 rest/
 *.pyc
 *.conll
+models/
+runs/
+cache_dir/

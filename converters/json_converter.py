@@ -1,10 +1,13 @@
 import json
+import os
 import random
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Self
+from typing import Optional, Self, Final
+
+BASE_DIR: Final[Path] = Path(os.getcwd()).parent
 
 
 @dataclass
@@ -51,14 +54,14 @@ class JsonToTsvConverter:
         :param save_path: Path to directory
         """
         # a or b is just more pythonic way to do a if a else b
-        self.train_path = train_path or Path("data/train/in.tsv")
-        self.test_path = test_path or Path("data/test-A/in.tsv")
+        self.train_path = train_path or BASE_DIR / Path("data/train/in.tsv")
+        self.test_path = test_path or BASE_DIR / Path("data/test-A/in.tsv")
         default_data_paths = [
-            Path("data/text.rest/wikinews/all/json"),
-            Path("data/text.rest/wikitalks/all/json"),
+            BASE_DIR / Path("data/text.rest/wikinews/all/json"),
+            BASE_DIR / Path("data/text.rest/wikitalks/all/json"),
         ]
         self.data_paths = data_paths or default_data_paths
-        self.save_path = save_path or Path("parsed_data/text.rest")
+        self.save_path = save_path or BASE_DIR / Path("parsed_data/text.rest")
 
     def convert(self) -> None:
         """
@@ -190,7 +193,7 @@ class JsonToTsvConverter:
                 text_in += word_data.word
                 text_exp += word_data.word
                 # "-" should be also present?????? strange edge case
-                if word_data.punctuation == "-" and not word_data.space_after:
+                if word_data.punctuation != "-" or word_data.space_after:
                     text_exp += word_data.punctuation
 
             text_intact += " "

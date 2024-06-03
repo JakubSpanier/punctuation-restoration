@@ -94,30 +94,13 @@ class DataSplitter:
         splitted_data.to_csv(self.out_file, sep="\t", index=False)
 
 
-# Example usage
 if __name__ == "__main__":
     tokenizer_path = "allegro/herbert-base-cased"
-    original_train_path = lambda name: Path(
-        f"parsed_data/original_train.tsv_{name}_1353.tsv"
-    )
-    original_test_path = lambda name: Path(
-        f"parsed_data/original_test-A.tsv_{name}_1353.tsv"
-    )
-    rest_path = lambda name: Path(f"parsed_data/text.rest/rest.tsv_{name}_1353.tsv")
-    names = ("dev", "train", "test")
-    path_functions = (original_train_path, original_test_path, rest_path)
-    files = [
-        (path_function(name), path_function(name).with_suffix(".tsv.s"))
-        for name in names
-        for path_function in path_functions
-    ]
+    original_train_file = Path("parsed_data/original_train.tsv")
+    original_test_file = Path("parsed_data/original_test-A.tsv")
+    rest_file = Path(f"parsed_data/text.rest/rest.tsv")
+    files = (original_train_file, original_test_file, rest_file)
 
-    for data_file, out_file in files:
-        splitter = DataSplitter(
-            data_file=data_file,
-            tokenizer_path=tokenizer_path,
-            max_seq_len=256,
-            stride=1.0,
-            out_file=out_file,
-        )
+    for data_file in files:
+        splitter = DataSplitter(data_file=data_file, tokenizer_path=tokenizer_path)
         splitter.run()

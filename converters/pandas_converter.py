@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, field
 
 import pandas as pd
@@ -5,6 +6,8 @@ import numpy as np
 import random
 from pathlib import Path
 from typing import Tuple, Final
+
+BASE_DIR: Final[Path] = Path(os.getcwd())
 
 SEED: Final[int] = 1353
 TRAIN_TO_TEST_DEV_RATIO: Final[float] = 0.8
@@ -143,30 +146,25 @@ class DataFrameSplitter:
         :param suffix: The suffix to add to the file name.
         """
 
-        file_path = self.out_file.parent / f"{self.out_file.name}{suffix}.tsv"
+        file_path = self.out_file.parent / f"{self.out_file.stem}{suffix}.tsv"
         data.to_csv(file_path, sep="\t", index=False)
 
 
-# Example usage
 if __name__ == "__main__":
-    kwargs = {"split_to_files": True}
     files = (
         (
-            Path("../parsed_data/original_train.conll"),
-            Path("parsed_data/original_train.tsv"),
+            BASE_DIR / Path("parsed_data/original_train.conll"),
+            BASE_DIR / Path("parsed_data/original_train.tsv"),
         ),
         (
-            Path("../parsed_data/original_test-A.conll"),
-            Path("parsed_data/original_test-A.tsv"),
+            BASE_DIR / Path("parsed_data/original_test-A.conll"),
+            BASE_DIR / Path("parsed_data/original_test-A.tsv"),
         ),
         (
-            Path("../parsed_data/text.rest/rest.conll"),
-            Path("parsed_data/text.rest/rest.tsv"),
+            BASE_DIR / Path("parsed_data/text.rest/rest.conll"),
+            BASE_DIR / Path("parsed_data/text.rest/rest.tsv"),
         ),
     )
     for data_file, out_file in files:
-        kwargs["data_file"] = data_file
-        kwargs["out_file"] = out_file
-
-        splitter = DataFrameSplitter(**kwargs)
+        splitter = DataFrameSplitter(data_file=data_file, out_file=out_file)
         splitter.run()

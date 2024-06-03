@@ -1,8 +1,13 @@
 import logging
+import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Final
+
+from enums import Label
 
 logger = logging.getLogger(__name__)
+
+BASE_DIR: Final[Path] = Path(os.getcwd()).parent
 
 
 class TsvParser:
@@ -158,34 +163,35 @@ class TsvParser:
         :returns
         """
         if in_token == expected_token:
-            return "B"
+            return Label.NO_PUNCTUATION.value
         elif in_token == expected_token[:-1]:
             return expected_token[-1]
-        elif in_token == expected_token[:-3] and expected_token[-3:] == "...":
-            return "..."
+        elif in_token == expected_token[:-3] and expected_token[-3:] == Label.ELLIPSIS:
+            return Label.ELLIPSIS.value
         else:
             logger.error(
                 f"Missmatch! Words aren't equal, ({in_token=}!={expected_token=})"
             )
-            return "B"
+            return Label.NO_PUNCTUATION.value
 
 
 if __name__ == "__main__":
-    for directory_name in ("train", "test-A"):
-        kwargs = {
-            "in_path": Path(f"data/{directory_name}/in.tsv"),
-            "expected_path": Path(f"data/{directory_name}/expected.tsv"),
-            # "fa_transcriptions_directory": Path("data/fa/poleval_fa.train.with_punctuation"),
-            "save_path": Path(f"parsed_data/original_{directory_name}.conll"),
-        }
+    if False:
+        for directory_name in ("train", "test-A"):
+            kwargs = {
+                "in_path": Path(f"data/{directory_name}/in.tsv"),
+                "expected_path": Path(f"data/{directory_name}/expected.tsv"),
+                # "fa_transcriptions_directory": Path("data/fa/poleval_fa.train.with_punctuation"),
+                "save_path": Path(f"parsed_data/original_{directory_name}.conll"),
+            }
 
-        tsv_parser = TsvParser(**kwargs)
-        tsv_parser.convert()
+            tsv_parser = TsvParser(**kwargs)
+            tsv_parser.convert()
 
     # Do this part after converting text jsons to tsv with the JsonToTsvConverter
-    if False:
+    if True:
         for name in ("train", "test", "rest"):
-            main_path = Path("parsed_data/text.rest/")
+            main_path = BASE_DIR / Path("parsed_data/text.rest/")
             kwargs = {
                 "in_path": main_path / Path(f"{name}_in.tsv"),
                 "expected_path": main_path / Path(f"{name}_expected.tsv"),
